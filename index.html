@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>28 · Les Prés Fleuris · 28 août</title>
+<title>Sofia’s Golden Birthday — Bretagne 2026</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Jost:wght@300;400;500&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
@@ -869,9 +869,12 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
 
     <div class="sp-suggest fade-in">
       <p class="sp-suggest-title">Pas sur Spotify ? Suggérez un morceau ici</p>
-      <div class="sp-suggest-form">
-        <input type="text" id="sp-song" placeholder="Titre &amp; artiste">
-        <button class="sp-suggest-btn" onclick="suggestSong()">Ajouter</button>
+      <div class="sp-suggest-form" style="flex-direction:column;gap:.5rem;">
+        <input type="text" id="sp-name-suggest" placeholder="Votre prénom">
+        <div style="display:flex;gap:.5rem;">
+          <input type="text" id="sp-song" placeholder="Titre &amp; artiste" style="flex:1;">
+          <button class="sp-suggest-btn" onclick="suggestSong()">Ajouter</button>
+        </div>
       </div>
       <div id="sp-suggestions"></div>
     </div>
@@ -1086,10 +1089,23 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
     </div>
     <div id="admin-panel" style="margin-top:1.25rem;text-align:left;">
       <div class="stats-row fade-in" id="stats-row"></div>
-      <div class="table-shell fade-in">
+      <!-- Tabs -->
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;">
+        <button id="tab-rsvp-btn" onclick="switchTab('rsvp')" style="font-size:.68rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:.35rem .9rem;border-radius:20px;border:1px solid rgba(242,232,216,.4);background:rgba(242,232,216,.2);color:var(--cream);cursor:pointer;">RSVPs</button>
+        <button id="tab-songs-btn" onclick="switchTab('songs')" style="font-size:.68rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:.35rem .9rem;border-radius:20px;border:1px solid rgba(242,232,216,.15);background:transparent;color:rgba(242,232,216,.5);cursor:pointer;">Suggestions</button>
+      </div>
+      <!-- RSVP tab -->
+      <div id="tab-rsvp" class="table-shell fade-in">
         <table class="rsvp-tbl">
           <thead><tr><th>Guest</th><th>Response</th><th>Arrives</th><th>Leaves</th><th>Transport</th><th>Partner</th><th>Dietary</th><th>Location</th></tr></thead>
           <tbody id="tbl-body"></tbody>
+        </table>
+      </div>
+      <!-- Suggestions tab -->
+      <div id="tab-songs" class="table-shell fade-in" style="display:none;">
+        <table class="rsvp-tbl">
+          <thead><tr><th>Prénom</th><th>Morceau</th><th>Date</th></tr></thead>
+          <tbody id="tbl-songs"></tbody>
         </table>
       </div>
     </div>
@@ -1131,7 +1147,7 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
 
 <script>
 // ░░ GOOGLE SHEETS INTEGRATION ░░
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzm9wfuaaA5mL8RgImqPfe4UftBYsyT1PL3PdOagffGGQpyW_WATzGT_LrNqz2uPa8pow/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz4FhBNmKvis--Y3HWfXtJnStl-XKS2OKjNqt_ZsJwfdhC_vyiXfx1wjP91KujRaazNdw/exec';
 var isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 var GUEST_LIST=[
@@ -1191,6 +1207,39 @@ function selectGuest(name){
 
 function hideDropdown(){
   document.getElementById('guest-dropdown').style.display='none';
+}
+
+
+function switchTab(tab){
+  document.getElementById('tab-rsvp').style.display = tab==='rsvp' ? 'block' : 'none';
+  document.getElementById('tab-songs').style.display = tab==='songs' ? 'block' : 'none';
+  var rsvpBtn = document.getElementById('tab-rsvp-btn');
+  var songsBtn = document.getElementById('tab-songs-btn');
+  if(tab==='rsvp'){
+    rsvpBtn.style.background='rgba(242,232,216,.2)'; rsvpBtn.style.color='var(--cream)'; rsvpBtn.style.borderColor='rgba(242,232,216,.4)';
+    songsBtn.style.background='transparent'; songsBtn.style.color='rgba(242,232,216,.5)'; songsBtn.style.borderColor='rgba(242,232,216,.15)';
+    if(!document.getElementById('tbl-body').children.length) renderAdmin();
+  } else {
+    songsBtn.style.background='rgba(242,232,216,.2)'; songsBtn.style.color='var(--cream)'; songsBtn.style.borderColor='rgba(242,232,216,.4)';
+    rsvpBtn.style.background='transparent'; rsvpBtn.style.color='rgba(242,232,216,.5)'; rsvpBtn.style.borderColor='rgba(242,232,216,.15)';
+    loadSongSuggestions();
+  }
+}
+function loadSongSuggestions(){
+  fetch(SHEETS_URL+'?type=suggestions')
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var tbody = document.getElementById('tbl-songs');
+    if(!data||!data.suggestions||!data.suggestions.length){
+      tbody.innerHTML='<tr class="empty-row"><td colspan="3">Aucune suggestion pour l’instant.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = data.suggestions.map(function(s){
+      return '<tr><td>'+s.name+'</td><td>♫ '+s.song+'</td><td>'+s.date+'</td></tr>';
+    }).join('');
+  }).catch(function(){
+    document.getElementById('tbl-songs').innerHTML='<tr class="empty-row"><td colspan="3">Erreur de chargement.</td></tr>';
+  });
 }
 
 function toggleFaq(i){
@@ -1630,20 +1679,31 @@ function initSpotify(){
 }
 
 function suggestSong(){
-  var val = document.getElementById('sp-song').value.trim();
-  if(!val) return;
-  var list = document.getElementById('sp-suggestions');
-  var item = document.createElement('div');
-  item.className = 'sp-song-item';
-  item.innerHTML = '<span>♫ '+val+'</span><span>Just now</span>';
-  list.insertBefore(item, list.firstChild);
-  document.getElementById('sp-song').value='';
-  // Save to localStorage
-  try{
-    var songs = JSON.parse(localStorage.getItem('sp_songs_moulin28')||'[]');
-    songs.unshift({song:val, date:new Date().toLocaleDateString('fr-FR')});
-    localStorage.setItem('sp_songs_moulin28', JSON.stringify(songs));
-  }catch(e){}
+  var nameEl = document.getElementById('sp-name-suggest');
+  var songEl = document.getElementById('sp-song');
+  var name = nameEl ? nameEl.value.trim() : '';
+  var song = songEl ? songEl.value.trim() : '';
+  if(!song) return;
+  var btn = document.querySelector('.sp-suggest-btn');
+  if(btn){btn.textContent='...';btn.disabled=true;}
+  fetch(SHEETS_URL,{
+    method:'POST',
+    body:JSON.stringify({type:'suggestion',name:name||'Anonyme',song:song,date:new Date().toLocaleDateString('fr-FR')}),
+    headers:{'Content-Type':'application/json'}
+  }).then(function(){
+    if(btn){btn.textContent='Ajouté ✓';setTimeout(function(){btn.textContent='Ajouter';btn.disabled=false;},2000);}
+    if(songEl) songEl.value='';
+    if(nameEl) nameEl.value='';
+    var list=document.getElementById('sp-suggestions');
+    if(list){
+      var item=document.createElement('div');
+      item.className='sp-song-item';
+      item.innerHTML='<span>♫ '+song+'</span><span>'+(name||'Anonyme')+' · '+new Date().toLocaleDateString('fr-FR')+'</span>';
+      list.insertBefore(item,list.firstChild);
+    }
+  }).catch(function(){
+    if(btn){btn.textContent='Erreur';setTimeout(function(){btn.textContent='Ajouter';btn.disabled=false;},2000);}
+  });
 }
 
 function loadSuggestions(){
