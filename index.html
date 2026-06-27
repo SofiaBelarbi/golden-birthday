@@ -1147,7 +1147,7 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
 
 <script>
 // ░░ GOOGLE SHEETS INTEGRATION ░░
-var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbz4FhBNmKvis--Y3HWfXtJnStl-XKS2OKjNqt_ZsJwfdhC_vyiXfx1wjP91KujRaazNdw/exec';
+var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyvHG9yhcu6NkFoYiTl9zoAnF2-wsprG9y9LLrmXJaOUwf6abtb_i9Yfe-vv5H5l9XcKg/exec';
 var isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
 
 var GUEST_LIST=[
@@ -1226,20 +1226,19 @@ function switchTab(tab){
   }
 }
 function loadSongSuggestions(){
-  fetch(SHEETS_URL+'?type=suggestions')
-  .then(function(r){return r.json();})
-  .then(function(data){
-    var tbody = document.getElementById('tbl-songs');
-    if(!data||!data.suggestions||!data.suggestions.length){
-      tbody.innerHTML='<tr class="empty-row"><td colspan="3">Aucune suggestion pour l’instant.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = data.suggestions.map(function(s){
-      return '<tr><td>'+s.name+'</td><td>♫ '+s.song+'</td><td>'+s.date+'</td></tr>';
-    }).join('');
-  }).catch(function(){
-    document.getElementById('tbl-songs').innerHTML='<tr class="empty-row"><td colspan="3">Erreur de chargement.</td></tr>';
-  });
+  var s=document.createElement('script');
+  s.src=SHEETS_URL+'?type=suggestions&callback=handleSongsData&t='+Date.now();
+  document.head.appendChild(s);
+}
+function handleSongsData(data){
+  var tbody=document.getElementById('tbl-songs');
+  if(!data||!data.suggestions||!data.suggestions.length){
+    tbody.innerHTML='<tr class="empty-row"><td colspan="3">Aucune suggestion pour l’instant.</td></tr>';
+    return;
+  }
+  tbody.innerHTML=data.suggestions.map(function(s){
+    return '<tr><td>'+s.name+'</td><td>♫ '+s.song+'</td><td>'+s.date+'</td></tr>';
+  }).join('');
 }
 
 function toggleFaq(i){
@@ -1344,28 +1343,23 @@ function submitRSVP(){
 function checkAdmin(){var PWD='GB2808MdT!';if(document.getElementById('admin-pwd').value===PWD){document.getElementById('admin-gate').style.display='none';document.getElementById('admin-panel').classList.add('open');renderAdmin();}else alert('Incorrect password.');}
 function sc(n,cls,lbl){return '<div class="stat-card"><div class="stat-n '+cls+'">'+n+'</div><div class="stat-lbl">'+lbl+'</div></div>';}
 function renderAdmin(){
-  var processData=function(data){
+  var s=document.createElement('script');
+  s.src=SHEETS_URL+'?callback=handleAdminData&t='+Date.now();
+  document.head.appendChild(s);
+}
+function handleAdminData(data){
+  try{
     var yes=data.filter(function(r){return r.att==='yes';}).length;
-    var maybe=data.filter(function(r){return r.att==='maybe';}).length;
     var no=data.filter(function(r){return r.att==='no';}).length;
     var cars=data.filter(function(r){return r.transport==='own-car'||r.transport==='rental';}).length;
-    document.getElementById('stats-row').innerHTML=sc(data.length,'','RSVPs')+sc(yes,'green','Confirmed')+sc(maybe,'amber','Maybe')+sc(no,'red','Can\'t come')+sc(cars,'blue','With a car');
+    document.getElementById('stats-row').innerHTML=
+      sc(data.length,'','RSVPs')+sc(yes,'green','Confirmed')+sc(no,'red','Can’t come')+sc(cars,'blue','With a car');
     var tbody=document.getElementById('tbl-body');
-    if(!data.length){tbody.innerHTML='<tr class="empty-row"><td colspan="8">No RSVPs yet.</td></tr>';return;}
-    tbody.innerHTML=data.map(function(r){return '<tr><td><strong style="font-weight:500">'+r.name+'</strong>'+(r.partner?'<br><span style="font-size:.76rem;color:var(--muted);font-weight:300">+ '+(r.pname||'partner')+'</span>':'')+'</td><td><span class="tag tag-'+(r.att==='yes'?'yes':r.att==='no'?'no':'maybe')+'">'+r.att+'</span></td><td style="font-size:.82rem;font-weight:300">'+r.arrival+'</td><td style="font-size:.82rem;font-weight:300">'+(r.departure||'—')+'</td><td><span class="tag tag-car" style="font-size:.62rem">'+r.transport.replace(/-/g,' ')+'</span></td><td style="font-size:.82rem">'+(r.partner?(r.pname||'yes'):'—')+'</td><td style="font-size:.82rem;font-weight:300">'+(r.diet||'—')+'</td><td style="font-size:.82rem;font-weight:300">'+r.location+'</td></tr>';}).join('');
-  };
-  
-  if(isLocalHost){
-    processData(getRSVPs());
-  } else {
-    fetch(SHEETS_URL)
-    .then(function(response){return response.json();})
-    .then(function(data){
-      if(data.status==='error'){throw new Error(data.message);}
-      processData(data);
-    })
-    .catch(function(err){alert('Error loading RSVPs: '+err.message);});
-  }
+    if(!data.length){tbody.innerHTML='<tr class="empty-row"><td colspan="8">No responses yet.</td></tr>';return;}
+    tbody.innerHTML=data.map(function(r){
+      return '<tr><td>'+r.name+'</td><td><span class="tag tag-'+(r.att||'maybe')+'">'+r.att+'</span></td><td>'+r.arrival+'</td><td>'+r.departure+'</td><td>'+r.transport+'</td><td>'+(r.partner?r.pname:'—')+'</td><td>'+(r.diet||'—')+'</td><td>'+r.location+'</td></tr>';
+    }).join('');
+  }catch(e){}
 }
 function assignLoc(i,val){
   // Location updates would require additional Google Sheets setup
