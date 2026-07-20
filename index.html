@@ -310,9 +310,39 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
 .faq-item.open .faq-chevron{transform:rotate(180deg);}
 .faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s ease;padding:0 1.1rem;color:var(--muted);font-size:.85rem;line-height:1.75;font-weight:300;}
 .faq-item.open .faq-a{max-height:400px;padding:.1rem 1.1rem .85rem;}
+@keyframes pulse-gold{0%,100%{box-shadow:0 0 0 0 rgba(192,144,48,.3);}50%{box-shadow:0 0 0 8px rgba(192,144,48,.0);}}
 </style>
 </head>
 <body>
+
+<div id="site-gate" style="position:fixed;inset:0;z-index:9999;background:var(--charcoal);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;">
+  <!-- Wisteria decoration -->
+  <div style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;">
+    <svg viewBox="0 0 400 600" style="position:absolute;left:0;top:0;width:35%;opacity:.18" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60,0 Q55,80 58,180 Q61,280 56,380" fill="none" stroke="#c8a4f0" stroke-width="1.5"/>
+      <circle cx="50" cy="120" r="10" fill="#d8b8f8" opacity=".7"/>
+      <circle cx="64" cy="230" r="7" fill="#e0c8fc" opacity=".6"/>
+      <circle cx="52" cy="320" r="12" fill="#c8a4f0" opacity=".5"/>
+    </svg>
+    <svg viewBox="0 0 400 600" style="position:absolute;right:0;bottom:0;width:35%;opacity:.15;transform:scaleX(-1)" xmlns="http://www.w3.org/2000/svg">
+      <path d="M60,0 Q55,80 58,180 Q61,280 56,380" fill="none" stroke="#c09030" stroke-width="1.5"/>
+      <circle cx="50" cy="120" r="8" fill="#f0d080" opacity=".6"/>
+      <circle cx="64" cy="230" r="6" fill="#c09030" opacity=".5"/>
+    </svg>
+  </div>
+  <!-- Content -->
+  <p style="font-family:'Jost',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:rgba(242,232,216,.5);margin-bottom:.75rem;">28 — 31 août 2026</p>
+  <h1 style="font-family:'Playfair Display','Cormorant Garamond',serif;font-size:2.8rem;font-weight:400;font-style:italic;color:#f2e8d8;margin:0 0 .25rem;text-align:center;">Sofia's</h1>
+  <h1 style="font-family:'Cormorant Garamond',serif;font-size:2.8rem;font-weight:400;font-style:italic;color:#c09030;margin:0 0 2rem;text-align:center;">Golden Birthday</h1>
+  <p style="font-family:'Jost',sans-serif;font-size:.82rem;font-weight:300;color:rgba(242,232,216,.55);margin-bottom:1.25rem;letter-spacing:.04em;">Entrez le mot de passe pour accéder au site</p>
+  <div style="display:flex;gap:.5rem;width:100%;max-width:320px;">
+    <input id="gate-pwd" type="password" placeholder="Mot de passe" onkeydown="if(event.key==='Enter')checkGate()"
+      style="flex:1;padding:.6rem 1rem;border-radius:25px;border:1px solid rgba(242,232,216,.2);background:rgba(242,232,216,.08);color:#f2e8d8;font-size:.88rem;font-family:'Jost',sans-serif;outline:none;">
+    <button onclick="checkGate()"
+      style="padding:.6rem 1.25rem;border-radius:25px;border:1px solid rgba(242,232,216,.3);background:rgba(192,144,48,.2);color:#c09030;font-size:.75rem;font-weight:600;letter-spacing:.12em;cursor:pointer;font-family:'Jost',sans-serif;">GO</button>
+  </div>
+  <p id="gate-err" style="color:#c04030;font-size:.78rem;margin-top:.75rem;opacity:0;transition:opacity .2s;">Mot de passe incorrect</p>
+</div>
 <nav id="nav">
   <span class="nav-logo"></span>
   <ul class="nav-links">
@@ -468,7 +498,8 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
     <h1 class="h-title">Sofia’s<br><span class="it">Golden Birthday</span></h1>
     <p class="h-subtitle">A Weekend in Bretagne</p>
     <p class="h-date">28 — 31 août 2026 · Moulin de Tronscorff, Morbihan</p>
-    <button class="h-btn" onclick="goTo('rsvp')">RSVP <span class="arr">→</span></button>
+    <a onclick="goTo('faq')" style="display:inline-flex;align-items:center;gap:.5rem;background:rgba(192,144,48,.15);border:1px solid rgba(192,144,48,.5);border-radius:25px;padding:.45rem 1.1rem;font-family:'Jost',sans-serif;font-size:.72rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:#c09030;cursor:pointer;text-decoration:none;margin-bottom:1rem;animation:pulse-gold 2s ease-in-out infinite;">🤠 Yeee Hawww… Theme is out!</a>
+<button class="h-btn" onclick="goTo('rsvp')">RSVP <span class="arr">→</span></button>
   </div>
 </section>
 <div id="photo-strip" style="width:100%;background:var(--cream);height:300px;position:relative;z-index:1;overflow:hidden;user-select:none;">
@@ -722,13 +753,13 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
           <div class="ti"><div class="td-dot"></div>
             <p class="t-time">18h00</p>
             <h3 class="t-title">Get ready</h3>
-            <p class="t-desc">Time to change to be in <strong>THE THEME</strong>.</p>
-            <span class="mystery">Thème à révéler</span>
+            <p class="t-desc">Time to change to be in <strong>THE THEME</strong> 🤠 Cowboy vibes — jean, bottes, chapeau, ceinture… soyez aussi extra que vous le souhaitez !</p>
+            <span class="mystery">🤠 Cowboy</span>
           </div>
           <div class="ti"><div class="td-dot accent"></div>
             <p class="t-time">20h00 ✦</p>
             <h3 class="t-title">The birthday party</h3>
-            <p class="t-desc">Let's drink, let's dance, let's laugh.</p>
+            <p class="t-desc">🤠 Thème Cowboy — jean, santiags, chapeau… ou aussi extra que vous l’osez. Let’s drink, let’s dance, let’s laugh.</p>
           </div>
         </div>
       </div>
@@ -828,7 +859,11 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
         <label class="cb-item">
           <input type="checkbox" class="cb-input">
           <span class="cb-mark"></span>
-          <span class="cb-text">Maillot de bain <span style="font-size:0.85em;color:var(--stone);">pour les plus valeureux… petit plouf dans la rivière possible</span></span>
+          <span class="cb-text">🤠 Tenue cowboy <span style="font-size:0.85em;color:var(--stone);">jean, bottes, chapeau, ceinture… aussi extra que tu veux !</span></span></label>
+          </div>
+          <div class="cb-item">
+            <input type="checkbox" class="cb-input" id="cb-swim">
+            <label class="cb-label" for="cb-swim"><span class="cb-text">Maillot de bain <span style="font-size:0.85em;color:var(--stone);">pour les plus valeureux… petit plouf dans la rivière possible</span></span>
         </label>
       </div>
     </div>
@@ -1037,7 +1072,7 @@ footer p{font-size:.75rem;color:var(--stone);font-family:'Cormorant Garamond',se
           <span class="faq-btn-q">Quel est le thème de la soirée du samedi ?</span>
           <svg class="faq-chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 6l4 4 4-4"/></svg>
         </button>
-        <div class="faq-a">Incoming… 🤠🐴⭐🏜️</div>
+        <div class="faq-a">🤠 <strong>Cowboy !</strong> Jean brut et santiags pour les classiques, ou aussi extravagant que vous le souhaitez — ceintures, chapeaux, franges… Pensez juste à porter des chaussures et des vêtements confortables et pas trop délicats — on sera dehors dans la nature, avec de la poussière, de l’herbe et des animaux. Vos plus belles tenues de soie peuvent rester à la maison 😉</div>
       </div>
       <div class="faq-item" id="faq-6">
         <button class="faq-btn" onclick="toggleFaq(6)">
@@ -1240,6 +1275,31 @@ function handleSongsData(data){
     return '<tr><td>'+s.name+'</td><td>♫ '+s.song+'</td><td>'+s.date+'</td></tr>';
   }).join('');
 }
+
+
+/* SITE GATE */
+(function(){
+  var PWD = 'SofiaGolden28!';
+  var KEY = 'sg_access';
+  if(localStorage.getItem(KEY) === '1'){
+    document.getElementById('site-gate').style.display = 'none';
+  }
+  window.checkGate = function(){
+    var val = document.getElementById('gate-pwd').value;
+    if(val === PWD){
+      localStorage.setItem(KEY, '1');
+      var gate = document.getElementById('site-gate');
+      gate.style.transition = 'opacity .4s';
+      gate.style.opacity = '0';
+      setTimeout(function(){ gate.style.display = 'none'; }, 400);
+    } else {
+      var err = document.getElementById('gate-err');
+      err.style.opacity = '1';
+      setTimeout(function(){ err.style.opacity = '0'; }, 2000);
+      document.getElementById('gate-pwd').value = '';
+    }
+  };
+})();
 
 function toggleFaq(i){
   var item=document.getElementById('faq-'+i);
